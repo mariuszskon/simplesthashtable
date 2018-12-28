@@ -1,6 +1,12 @@
 #ifndef SIMPLEHASHTABLE_SHT_H
 #define SIMPLEHASHTABLE_SHT_H
 
+/*
+ * COMPILE-TIME CONFIGURABLE OPTION: MAXIMUM KEY LENGTH
+ * (not including null terminator)
+ * it is recommended to choose a number which is one less than a multiple of 8 to prevent wasted space
+ * due to struct padding by many compilers
+ */
 #define SHT_MAX_KEY_LENGTH 15 /* not including null terminator */
 
 struct sht_entry {
