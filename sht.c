@@ -2,6 +2,7 @@
 /* this uses linear probing open addressing (https://en.wikipedia.org/wiki/Open_addressing) to handle collisions */
 
 #include <string.h>
+#include <limits.h>
 
 #include "sht.h"
 
@@ -9,15 +10,14 @@
 unsigned long sht_hash(char *s) {
     unsigned long hash;
     int i;
-    /* these are standard FNV offsets and primes */
-    unsigned long fnv_offset[] = {0x811c9dc5UL, 0xcbf29ce484222325UL, 0x6c62272e07bb014262b821756295c58dUL, 0xdd268dbcaac550362d98c384c4e576ccc8b1536847b6bbb31023b4c8caee0535UL};
-    unsigned long fnv_prime[] = {(2UL << 23) + (2UL << 7) + 0x93, (2UL << 39) + (2UL << 7) + 0xb3, (2UL << 87) + (2UL << 7) + 0x3b, (2UL << 167) + (2UL << 7) + 0x63};
-    int fnv_index = sizeof(unsigned long) / 4 - 1; /* 4 (32-bit) becomes 0, 8 (64-bit) becomes 1 etc. */
+    /* these are standard FNV offsets and primes - 32-bit if unsigned long is 32 bits, else assume 64-bit mode */
+    unsigned long fnv_offset = sizeof(unsigned long) * CHAR_BIT == 32 ? 2166136261UL : 14695981039346656037UL;
+    unsigned long fnv_prime = sizeof(unsigned long) * CHAR_BIT == 32 ? 16777619UL : 1099511628211UL;
 
-    hash = fnv_offset[fnv_index];
+    hash = fnv_offset;
     for (i = 0; i < SHT_MAX_KEY_LENGTH && s[i] != '\0'; i++) {
         hash ^= s[i];
-        hash *= fnv_prime[fnv_index];
+        hash *= fnv_prime;
     }
 
     return hash;
