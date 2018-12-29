@@ -24,6 +24,19 @@ unsigned long sht_hash(char *s) {
     return hash;
 }
 
+/* fill a table of elements with "null" elements */
+void sht_init_table(struct sht_entry table[], unsigned long table_length) {
+    unsigned long i;
+    struct sht_entry entry;
+
+    entry.key[0] = '\0'; /* label entry as empty/null */
+    entry.value = NULL;
+
+    for (i = 0; i < table_length; i++) {
+        table[i] = entry;
+    }
+}
+
 /* internal use function to either find an existing element or position where to insert new element */
 static unsigned long find(struct sht_entry table[], unsigned long table_length, char *key) {
     unsigned long p = sht_hash(key) % table_length;
@@ -48,19 +61,6 @@ void sht_insert(struct sht_entry table[], unsigned long table_length, char *key,
     strncat(table[p].key, key, SHT_MAX_KEY_LENGTH);
 
     table[p].value = value;
-}
-
-/* fill a table of elements with "null" elements */
-void sht_init_table(struct sht_entry table[], unsigned long table_length) {
-    unsigned long i;
-    struct sht_entry entry;
-
-    entry.key[0] = '\0'; /* label entry as empty/null */
-    entry.value = NULL;
-
-    for (i = 0; i < table_length; i++) {
-        table[i] = entry;
-    }
 }
 
 void *sht_delete(struct sht_entry table[], unsigned long table_length, char *key) {

@@ -17,9 +17,9 @@ struct sht_entry {
 };
 
 unsigned long sht_hash(char *s);
+void sht_init_table(struct sht_entry table[], unsigned long table_length);
 void *sht_lookup(struct sht_entry table[], unsigned long table_length, char *key);
 void sht_insert(struct sht_entry table[], unsigned long table_length, char *key, void *value);
-void sht_init_table(struct sht_entry table[], unsigned long table_length);
 void *sht_delete(struct sht_entry table[], unsigned long table_length, char *key);
 
 #endif
