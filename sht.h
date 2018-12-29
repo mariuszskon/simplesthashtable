@@ -1,3 +1,5 @@
+/* this code is under the Unlicense - see LICENSE for details */
+
 #ifndef SIMPLEHASHTABLE_SHT_H
 #define SIMPLEHASHTABLE_SHT_H
 

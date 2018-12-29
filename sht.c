@@ -1,4 +1,5 @@
 /* simplehashtable (sht.c) */
+/* this code is under the Unlicense - see LICENSE for details */
 /* this uses linear probing open addressing (https://en.wikipedia.org/wiki/Open_addressing) to handle collisions */
 
 #include <string.h>

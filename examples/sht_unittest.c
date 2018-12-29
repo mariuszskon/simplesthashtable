@@ -1,3 +1,5 @@
+/* this code is under the Unlicense - see LICENSE for details */
+
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
