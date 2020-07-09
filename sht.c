@@ -38,48 +38,49 @@ void sht_init_table(struct sht_entry table[], unsigned long table_length) {
 }
 
 /* internal use function to either find an existing element or position where to insert new element */
-static unsigned long find(struct sht_entry table[], unsigned long table_length, char *key) {
-    unsigned long p = sht_hash(key) % table_length;
-    unsigned long first_free = p;
+static struct sht_entry *find(struct sht_entry table[], unsigned long table_length, char *key) {
+    struct sht_entry *p = &table[sht_hash(key) % table_length];
+    struct sht_entry *first_free = NULL;
 
-    while (table[p].key[0] != '\0' && strncmp(table[p].key, key, SHT_MAX_KEY_LENGTH) != 0) {
+    while (p->key[0] != '\0' && strncmp(p->key, key, SHT_MAX_KEY_LENGTH) != 0) {
         /* this is either "really free" or a "tombstone" */
-        /* if not tombstone, and we don't already have a free position, move it along
-         * so we can leave first_free on the first free position */
-        if (table[p].value != NULL && first_free == p) {
-            first_free = (p + 1) % table_length;
-        }
+        /* if we did not see a tombstone before, and this is a tombstone,
+         * then this is the first free position */
+        if (first_free == NULL && p->value == NULL) first_free = p;
         /* always increment the "current" position p */
-        p = (p + 1) % table_length;
+        p = &table[(p - table + 1) % table_length];
     }
 
-    if (strncmp(table[p].key, key, SHT_MAX_KEY_LENGTH) != 0) {
+    if (first_free == NULL) first_free = p;
+
+    if (strncmp(p->key, key, SHT_MAX_KEY_LENGTH) != 0) {
         /* element never found, so return free position */
         return first_free;
     }
+    /* otherwise we return the found position */
     return p;
 }
 
 /* get element by key */
 void *sht_lookup(struct sht_entry table[], unsigned long table_length, char *key) {
-    return table[find(table, table_length, key)].value;
+    return find(table, table_length, key)->value;
 }
 
 /* insert/override an element's value by key */
 void sht_insert(struct sht_entry table[], unsigned long table_length, char *key, void *value) {
-    unsigned long p = find(table, table_length, key);
+    struct sht_entry *p = find(table, table_length, key);
 
-    table[p].key[0] = '\0';
-    strncat(table[p].key, key, SHT_MAX_KEY_LENGTH);
+    p->key[0] = '\0';
+    strncat(p->key, key, SHT_MAX_KEY_LENGTH);
 
-    table[p].value = value;
+    p->value = value;
 }
 
 void *sht_delete(struct sht_entry table[], unsigned long table_length, char *key) {
-    unsigned long p = find(table, table_length, key);
-    void *value = table[p].value;
+    struct sht_entry *p = find(table, table_length, key);
+    void *value = p->value;
 
-    table[p].value = NULL; /* sht_lookup returns NULL which also happens if slot was never filled */
+    p->value = NULL; /* sht_lookup returns NULL which also happens if slot was never filled */
     /* key not modified so that in case of collisions, all elements can still be found */
 
     return value;
