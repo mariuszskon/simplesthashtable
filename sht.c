@@ -40,11 +40,23 @@ void sht_init_table(struct sht_entry table[], unsigned long table_length) {
 /* internal use function to either find an existing element or position where to insert new element */
 static unsigned long find(struct sht_entry table[], unsigned long table_length, char *key) {
     unsigned long p = sht_hash(key) % table_length;
+    unsigned long first_free = p;
 
     while (table[p].key[0] != '\0' && strncmp(table[p].key, key, SHT_MAX_KEY_LENGTH) != 0) {
+        /* this is either "really free" or a "tombstone" */
+        /* if not tombstone, and we don't already have a free position, move it along
+         * so we can leave first_free on the first free position */
+        if (table[p].value != NULL && first_free == p) {
+            first_free = (p + 1) % table_length;
+        }
+        /* always increment the "current" position p */
         p = (p + 1) % table_length;
     }
 
+    if (strncmp(table[p].key, key, SHT_MAX_KEY_LENGTH) != 0) {
+        /* element never found, so return free position */
+        return first_free;
+    }
     return p;
 }
 

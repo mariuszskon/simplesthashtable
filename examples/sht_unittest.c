@@ -30,6 +30,8 @@ int main() {
 
     sht_insert(table, HASH_TABLE_SIZE, "another", (void *) 0x5678);
     assert(sht_lookup(table, HASH_TABLE_SIZE, "another") == (void *) 0x5678);
+    sht_insert(table, HASH_TABLE_SIZE, "another", (void *) 0x9abc);
+    assert(sht_lookup(table, HASH_TABLE_SIZE, "another") == (void *) 0x9abc);
 
     sht_insert(table, HASH_TABLE_SIZE, "012345678912345", (void *) 0xffffffff);
     assert(sht_lookup(table, HASH_TABLE_SIZE, "012345678912345") == (void *) 0xffffffff);
@@ -78,5 +80,14 @@ int main() {
 
         assert(sht_lookup(table, HASH_TABLE_SIZE, "hello") == NULL);
         assert(sht_lookup(table, HASH_TABLE_SIZE, "world") == (void *) 2);
+        /* test "the edge case" where an element along probe chain is inserted again,
+         * and the probe chain had a deleted element earlier */
+        sht_insert(table, HASH_TABLE_SIZE, "abc", (void *) 7);
+        assert(sht_lookup(table, HASH_TABLE_SIZE, "abc") == (void *) 7);
+        /* then we try to reuse the same position, which we deleted earlier */
+        assert(sht_hash("hello") % HASH_TABLE_SIZE == sht_hash("abcdefghijk") % HASH_TABLE_SIZE);
+        sht_insert(table, HASH_TABLE_SIZE, "abcdefghijk", (void *) 8);
+        assert(sht_lookup(table, HASH_TABLE_SIZE, "abcdefghijk") == (void *) 8);
+        assert(table[sht_hash("abcdefghijk") % HASH_TABLE_SIZE].value == (void *) 8);
     }
 }
